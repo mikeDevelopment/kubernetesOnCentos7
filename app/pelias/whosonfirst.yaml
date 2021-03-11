@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: whosonfirst
+  name: whosonfirst
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: whosonfirst
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: whosonfirst
+    spec:
+      containers:
+      - image: pelias/whosonfirst:master
+        imagePullPolicy: ""
+        name: pelias-whosonfirst
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: whosonfirst-hostpath0
+        - mountPath: /data
+          name: whosonfirst-hostpath1
+        - mountPath: /data/blacklist
+          name: whosonfirst-hostpath2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/pelias.json
+        name: whosonfirst-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+          type: Directory
+        name: whosonfirst-hostpath1
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/blacklist
+          type: Directory
+        name: whosonfirst-hostpath2
+status: {}

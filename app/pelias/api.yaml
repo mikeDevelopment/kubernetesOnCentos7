@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: api
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: api
+    spec:
+      containers:
+      - env:
+        - name: PORT
+          value: "4000"
+        image: pelias/api:master
+        imagePullPolicy: ""
+        name: pelias-api
+        ports:
+        - containerPort: 4000
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: api-hostpath0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/pelias.json
+          type: File
+        name: api-hostpath0
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api
+  name: api
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4000"
+    port: 4000
+    targetPort: 4000
+    nodePort: 4000
+  selector:
+    io.kompose.service: api
+status:
+  loadBalancer: {}

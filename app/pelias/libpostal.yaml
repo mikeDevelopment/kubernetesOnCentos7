@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: libpostal
+  name: libpostal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: libpostal
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: libpostal
+    spec:
+      containers:
+      - image: pelias/libpostal-service
+        imagePullPolicy: ""
+        name: pelias-libpostal
+        ports:
+        - containerPort: 4400
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: null
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: libpostal
+  name: libpostal
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4400"
+    port: 4400
+    targetPort: 4400
+    nodePort: 4400
+  selector:
+    io.kompose.service: libpostal
+status:
+  loadBalancer: {}

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: schema
+  name: schema
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: schema
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: schema
+    spec:
+      containers:
+      - image: pelias/schema:master
+        imagePullPolicy: ""
+        name: pelias-schema
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: schema-hostpath0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/pelias.json
+        name: schema-hostpath0
+status: {}

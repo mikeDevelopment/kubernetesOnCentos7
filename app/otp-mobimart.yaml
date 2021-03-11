@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: otp
+          image: liguriadigitale/otp-mobimart-server:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 44444
+          env:
+          - name: JAVA_OPTS
+            value: -Xms8G -Xmx28G
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otp
+spec:
+  type: LoadBalancer
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 44444
+      targetPort: 44444
+      nodePort: 4444
+status:
+  loadBalancer: {}
+---

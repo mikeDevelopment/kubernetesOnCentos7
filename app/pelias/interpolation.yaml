@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: interpolation
+  name: interpolation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: interpolation
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: interpolation
+    spec:
+      containers:
+      - env:
+        - name: PORT
+          value: "4300"
+        image: pelias/interpolation:master
+        imagePullPolicy: ""
+        name: pelias-interpolation
+        ports:
+        - containerPort: 4300
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: interpolation-hostpath0
+        - mountPath: /data
+          name: interpolation-hostpath1
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/pelias.json
+        name: interpolation-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: interpolation-hostpath1
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: interpolation
+  name: interpolation
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4300"
+    port: 4300
+    targetPort: 4300
+    nodePort: 4300
+  selector:
+    io.kompose.service: interpolation
+status:
+  loadBalancer: {}

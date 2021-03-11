@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: transit
+  name: transit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: transit
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: transit
+    spec:
+      containers:
+      - image: pelias/transit:master
+        imagePullPolicy: ""
+        name: pelias-transit
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: transit-hostpath0
+        - mountPath: /data
+          name: transit-hostpath1
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/transit/geocoder/docker/projects/liguria/pelias.json
+        name: transit-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: transit-hostpath1
+status: {}

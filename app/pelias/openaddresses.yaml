@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: openaddresses
+  name: openaddresses
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: openaddresses
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: openaddresses
+    spec:
+      containers:
+      - image: pelias/openaddresses:master
+        imagePullPolicy: ""
+        name: pelias-openaddresses
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: openaddresses-hostpath0
+        - mountPath: /data
+          name: openaddresses-hostpath1
+        - mountPath: /data/blacklist
+          name: openaddresses-hostpath2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/pelias.json
+        name: openaddresses-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: openaddresses-hostpath1
+      - hostPath:
+          path: /otp/geocoder/docker/projects/liguria/blacklist
+        name: openaddresses-hostpath2
+status: {}

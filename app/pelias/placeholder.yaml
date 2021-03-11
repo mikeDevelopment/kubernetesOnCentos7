@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: placeholder
+  name: placeholder
+spec:
+  strategy:
+    type: Recreate
+spec:
+  containers:
+  - env:
+    - name: PORT
+      value: "4100"
+    image: pelias/placeholder:master
+    name: pelias-placeholder
+    ports:
+    - containerPort: 4100
+    resources: {}
+    securityContext:
+      runAsUser: 1000
+    volumeMounts:
+    - mountPath: /code/pelias.json
+      name: placeholder-hostpath0
+    - mountPath: /data
+      name: placeholder-hostpath1
+    - mountPath: /data/blacklist
+      name: placeholder-hostpath2
+  restartPolicy: Always
+  volumes:
+  - hostPath:
+      path: /otp/geocoder/docker/projects/liguria/pelias.json
+    name: placeholder-hostpath0
+  - hostPath:
+      path: /data/pelias/liguria/
+      type: Directory
+    name: placeholder-hostpath1
+  - hostPath:
+      path: /otp/mobimart/geocoder/docker/projects/liguria/blacklist
+      type: Directory
+    name: placeholder-hostpath2
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: placeholder
+  name: placeholder
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4100"
+    port: 4100
+    targetPort: 4100
+    nodePort: 4100
+  selector:
+    io.kompose.service: placeholder
+status:
+  loadBalancer: {}

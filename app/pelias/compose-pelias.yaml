@@ -1,0 +1,788 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: libpostal
+  name: libpostal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: libpostal
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: libpostal
+    spec:
+      containers:
+      - image: pelias/libpostal-service
+        imagePullPolicy: ""
+        name: pelias-libpostal
+        ports:
+        - containerPort: 4400
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: null
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: libpostal
+  name: libpostal
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4400"
+    port: 4400
+    targetPort: 4400
+    nodePort: 4400
+  selector:
+    io.kompose.service: libpostal
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: schema
+  name: schema
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: schema
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: schema
+    spec:
+      containers:
+      - image: pelias/schema:master
+        imagePullPolicy: ""
+        name: pelias-schema
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: schema-hostpath0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: schema-hostpath0
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: api
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: api
+    spec:
+      containers:
+      - env:
+        - name: PORT
+          value: "4000"
+        image: pelias/api:master
+        imagePullPolicy: ""
+        name: pelias-api
+        ports:
+        - containerPort: 4000
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: api-hostpath0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+          type: File
+        name: api-hostpath0
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api
+  name: api
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4000"
+    port: 4000
+    targetPort: 4000
+    nodePort: 4000
+  selector:
+    io.kompose.service: api
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: placeholder
+  name: placeholder
+spec:
+  strategy:
+    type: Recreate
+spec:
+  containers:
+  - env:
+    - name: PORT
+      value: "4100"
+    image: pelias/placeholder:master
+    name: pelias-placeholder
+    ports:
+    - containerPort: 4100
+    resources: {}
+    securityContext:
+      runAsUser: 1000
+    volumeMounts:
+    - mountPath: /code/pelias.json
+      name: placeholder-hostpath0
+    - mountPath: /data
+      name: placeholder-hostpath1
+    - mountPath: /data/blacklist
+      name: placeholder-hostpath2
+  restartPolicy: Never
+  volumes:
+  - hostPath:
+      path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+    name: placeholder-hostpath0
+  - hostPath:
+      path: /data/pelias/liguria/
+      type: Directory
+    name: placeholder-hostpath1
+  - hostPath:
+      path: /otp/mobimart/geocoder/docker/projects/liguria/blacklist
+      type: Directory
+    name: placeholder-hostpath2
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: placeholder
+  name: placeholder
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4100"
+    port: 4100
+    targetPort: 4100
+    nodePort: 4100
+  selector:
+    io.kompose.service: placeholder
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: whosonfirst
+  name: whosonfirst
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: whosonfirst
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: whosonfirst
+    spec:
+      containers:
+      - image: pelias/whosonfirst:master
+        imagePullPolicy: ""
+        name: pelias-whosonfirst
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: whosonfirst-hostpath0
+        - mountPath: /data
+          name: whosonfirst-hostpath1
+        - mountPath: /data/blacklist
+          name: whosonfirst-hostpath2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: whosonfirst-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+          type: Directory
+        name: whosonfirst-hostpath1
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/blacklist
+          type: Directory
+        name: whosonfirst-hostpath2
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: openstreetmap
+  name: openstreetmap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: openstreetmap
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: openstreetmap
+    spec:
+      containers:
+      - image: pelias/openstreetmap:master
+        imagePullPolicy: ""
+        name: pelias-openstreetmap
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: openstreetmap-hostpath0
+        - mountPath: /data
+          name: openstreetmap-hostpath1
+        - mountPath: /data/blacklist
+          name: openstreetmap-hostpath2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: openstreetmap-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: openstreetmap-hostpath1
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/blacklist
+        name: openstreetmap-hostpath2
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: openaddresses
+  name: openaddresses
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: openaddresses
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: openaddresses
+    spec:
+      containers:
+      - image: pelias/openaddresses:master
+        imagePullPolicy: ""
+        name: pelias-openaddresses
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: openaddresses-hostpath0
+        - mountPath: /data
+          name: openaddresses-hostpath1
+        - mountPath: /data/blacklist
+          name: openaddresses-hostpath2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: openaddresses-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: openaddresses-hostpath1
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/blacklist
+        name: openaddresses-hostpath2
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: transit
+  name: transit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: transit
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: transit
+    spec:
+      containers:
+      - image: pelias/transit:master
+        imagePullPolicy: ""
+        name: pelias-transit
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: transit-hostpath0
+        - mountPath: /data
+          name: transit-hostpath1
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: transit-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: transit-hostpath1
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: csv-importer
+  name: csv-importer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: csv-importer
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: csv-importer
+    spec:
+      containers:
+      - image: pelias/csv-importer:master
+        imagePullPolicy: ""
+        name: pelias-csv-importer
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: csv-importer-hostpath0
+        - mountPath: /data
+          name: csv-importer-hostpath1
+        - mountPath: /data/blacklist
+          name: csv-importer-hostpath2
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: csv-importer-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: csv-importer-hostpath1
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/blacklist
+        name: csv-importer-hostpath2
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: polylines
+  name: polylines
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: polylines
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: polylines
+    spec:
+      containers:
+      - image: pelias/polylines:master
+        imagePullPolicy: ""
+        name: pelias-polylines
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: polylines-hostpath0
+        - mountPath: /data
+          name: polylines-hostpath1
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: polylines-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: polylines-hostpath1
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: interpolation
+  name: interpolation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: interpolation
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: interpolation
+    spec:
+      containers:
+      - env:
+        - name: PORT
+          value: "4300"
+        image: pelias/interpolation:master
+        imagePullPolicy: ""
+        name: pelias-interpolation
+        ports:
+        - containerPort: 4300
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: interpolation-hostpath0
+        - mountPath: /data
+          name: interpolation-hostpath1
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: interpolation-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: interpolation-hostpath1
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: interpolation
+  name: interpolation
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4300"
+    port: 4300
+    targetPort: 4300
+    nodePort: 4300
+  selector:
+    io.kompose.service: interpolation
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pip
+  name: pip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: pip
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: pip
+    spec:
+      containers:
+      - env:
+        - name: PORT
+          value: "4200"
+        image: pelias/pip-service:master
+        imagePullPolicy: ""
+        name: pelias-pip-service
+        ports:
+        - containerPort: 4200
+        resources: {}
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /code/pelias.json
+          name: pip-hostpath0
+        - mountPath: /data
+          name: pip-hostpath1
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /otp/mobimart/geocoder/docker/projects/liguria/pelias.json
+        name: pip-hostpath0
+      - hostPath:
+          path: /data/pelias/liguria/
+        name: pip-hostpath1
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pip
+  name: pip
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "4200"
+    port: 4200
+    targetPort: 4200
+    nodePort: 4200
+  selector:
+    io.kompose.service: pip
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: elasticsearch
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: elasticsearch
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: elasticsearch
+    spec:
+      containers:
+      - image: pelias/elasticsearch:7.5.1
+        imagePullPolicy: ""
+        name: pelias-elasticsearch
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: elasticsearch-hostpath0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - hostPath:
+          path: /data/pelias/liguria/elasticsearch
+        name: elasticsearch-hostpath0
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --volumes hostPath --file docker-compose.yml convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: elasticsearch
+  name: elasticsearch
+spec:
+  type: LoadBalancer
+  ports:
+  - name: "9200"
+    port: 9200
+    targetPort: 9200
+    nodePort: 9200
+  - name: "9300"
+    port: 9300
+    targetPort: 9300
+    nodePort: 9300
+  selector:
+    io.kompose.service: elasticsearch
+status:
+  loadBalancer: {}
+---

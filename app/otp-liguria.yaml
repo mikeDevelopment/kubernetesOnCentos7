@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otp-liguria
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: otp-liguria
+          image: liguriadigitale/otp-liguria-server
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5555
+          env:
+          - name: JAVA_OPTS
+            value: -Xms8G -Xmx28G
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otp-liguria
+spec:
+  type: LoadBalancer
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 55555
+      targetPort: 5555
+      nodePort: 5555
+status:
+  loadBalancer: {}
+---

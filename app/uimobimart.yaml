@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uimobimart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: uimobimart
+          image: liguriadigitale/travelplanner-ui-mobimart:1.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8086
+          env:
+          - name: CONFIG
+            value: "matka"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uimobimart
+spec:
+  type: LoadBalancer
+  selector:
+    app: web
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
+      nodePort: 8086
+status:
+  loadBalancer: {}
+---
